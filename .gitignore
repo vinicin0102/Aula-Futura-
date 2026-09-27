@@ -1,0 +1,10 @@
+.DS_Store
+Thumbs.db
+*.log
+
+# credenciais — nunca versionar
+api/config.php
+
+# estado gerado pelo servidor
+storage/*
+!storage/.htaccess
