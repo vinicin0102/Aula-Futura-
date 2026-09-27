@@ -1,0 +1,9 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "functions": {
+    "api/slides.js": { "maxDuration": 300 }
+  },
+  "rewrites": [
+    { "source": "/api/slides.php", "destination": "/api/slides" }
+  ]
+}

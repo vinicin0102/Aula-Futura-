@@ -7,7 +7,9 @@ professor, que depois podem ser editados e apresentados em tela cheia.
 
 ```
 index.html               o app (início, estúdio de edição e modo apresentação)
-api/slides.php           gera o roteiro de slides com a API do Claude
+api/slides.js            gera os slides com a API do Claude — versão Vercel
+vercel.json              encaminha /api/slides.php para a função da Vercel
+api/slides.php           gera os slides com a API do Claude — versão PHP
 api/_bootstrap.php       utilitários (config, CORS, respostas JSON)
 api/config.example.php   modelo de configuração
 storage/                 controle de limite por IP (não versionado)
@@ -32,7 +34,28 @@ storage/                 controle de limite por IP (não versionado)
 - **Aula de exemplo:** o botão "Ver aula de exemplo" abre uma aula pronta.
 - As aulas ficam salvas no navegador do professor (localStorage).
 
-## Instalação
+## Publicar na Vercel
+
+A Vercel não executa PHP, então lá quem gera os slides é `api/slides.js`
+(Node.js). O app chama o mesmo endereço nos dois casos.
+
+1. Importe o repositório na Vercel (sem framework, sem comando de build).
+2. Em **Settings → Environment Variables**, crie:
+
+   | Variável | O que é |
+   |---|---|
+   | `ANTHROPIC_API_KEY` | chave da API do Claude (obrigatória) |
+   | `SLIDES_CODIGO` | senha opcional. Sem ela, qualquer visitante gera |
+   | `SLIDES_LIMITE_HORA` | gerações por IP por hora (padrão 20) |
+   | `SLIDES_DEBUG` | `1` mostra o motivo real das falhas |
+
+3. Faça um **Redeploy**: variáveis novas só valem a partir do próximo deploy.
+
+Na Vercel o limite por IP vale por instância da função, então é uma proteção
+parcial. Para controlar o gasto de verdade, defina um limite mensal em
+**Settings → Limits** no Console da Anthropic.
+
+## Instalação em hospedagem PHP
 
 Requisitos: hospedagem com PHP 8.1+ e a extensão cURL.
 

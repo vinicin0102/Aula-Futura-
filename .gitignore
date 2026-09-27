@@ -8,3 +8,5 @@ api/config.php
 # estado gerado pelo servidor
 storage/*
 !storage/.htaccess
+
+node_modules/

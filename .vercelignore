@@ -1,0 +1,3 @@
+# A Vercel não executa PHP: estes arquivos são da versão para hospedagem PHP.
+api/*.php
+storage
