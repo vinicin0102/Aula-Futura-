@@ -8,7 +8,8 @@ declare(strict_types=1);
  * Saída: { apresentacao: { titulo, slides: [...] } }
  *
  * A chave da Anthropic fica só no servidor. Como cada geração custa dinheiro,
- * o endpoint exige o código de acesso do config.php e limita gerações por IP.
+ * o endpoint limita gerações por IP e por dia, e exige o código de acesso
+ * quando slides_codigo estiver preenchido no config.php.
  */
 
 require __DIR__ . '/_bootstrap.php';
@@ -23,14 +24,15 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
 $chave  = (string) ($config['anthropic_api_key'] ?? '');
 $codigo = (string) ($config['slides_codigo'] ?? '');
 
-if ($chave === '' || $codigo === '') {
+if ($chave === '') {
     responder(503, ['erro' => 'Gerador com IA não configurado no servidor. Use o modo manual.']);
 }
 
 $entrada = corpoJson();
 
-if (!hash_equals($codigo, (string) ($entrada['codigo'] ?? ''))) {
-    responder(401, ['erro' => 'Código de acesso inválido.']);
+// Senha opcional: só é exigida quando slides_codigo estiver preenchido.
+if ($codigo !== '' && !hash_equals($codigo, (string) ($entrada['codigo'] ?? ''))) {
+    responder(401, ['erro' => 'Digite o código de acesso para gerar com IA.', 'precisaCodigo' => true]);
 }
 
 const NIVEIS = [
@@ -82,8 +84,13 @@ if (!isset(NIVEIS[$nivel])) {
 }
 $quantidade = max(4, min(16, $quantidade));
 
-if (!dentroDoLimite($config, (int) ($config['slides_limite_hora'] ?? 20))) {
-    responder(429, ['erro' => 'Limite de gerações por hora atingido. Tente mais tarde.']);
+$ip = (string) ($_SERVER['REMOTE_ADDR'] ?? 'desconhecido');
+if (!dentroDoLimite($config, 'ip-' . sha1($ip), (int) ($config['slides_limite_hora'] ?? 20), 3600)) {
+    responder(429, ['erro' => 'Você atingiu o limite de gerações por hora. Tente mais tarde.']);
+}
+// Teto geral do site: protege os créditos da API mesmo com muitos visitantes.
+if (!dentroDoLimite($config, 'total', (int) ($config['slides_limite_dia'] ?? 200), 86400)) {
+    responder(429, ['erro' => 'O limite de gerações de hoje foi atingido. Tente amanhã ou use "Escrever meu roteiro".']);
 }
 
 @set_time_limit(200);
@@ -109,11 +116,13 @@ function textoLimpo(mixed $valor, int $max, bool $multilinha = false): string
     return mb_substr(trim((string) $texto), 0, $max);
 }
 
-/** Janela deslizante de 1 hora por IP, guardada em arquivo. */
-function dentroDoLimite(array $config, int $maximo): bool
+/** Janela deslizante guardada em arquivo: no máximo $maximo gerações a cada $janela segundos. */
+function dentroDoLimite(array $config, string $nome, int $maximo, int $janela): bool
 {
-    $ip      = (string) ($_SERVER['REMOTE_ADDR'] ?? 'desconhecido');
-    $arquivo = diretorioEstado($config) . '/slides-' . sha1($ip) . '.json';
+    if ($maximo <= 0) {
+        return true;
+    }
+    $arquivo = diretorioEstado($config) . '/limite-' . $nome . '.json';
     $agora   = time();
 
     $handle = @fopen($arquivo, 'c+');
@@ -125,7 +134,7 @@ function dentroDoLimite(array $config, int $maximo): bool
     $marcas = json_decode((string) stream_get_contents($handle), true);
     $marcas = array_values(array_filter(
         is_array($marcas) ? $marcas : [],
-        fn ($t) => is_int($t) && $t > $agora - 3600
+        fn ($t) => is_int($t) && $t > $agora - $janela
     ));
 
     $permitido = count($marcas) < $maximo;

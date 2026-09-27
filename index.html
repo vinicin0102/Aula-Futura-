@@ -546,7 +546,7 @@ label.campo { display: flex; flex-direction: column; gap: 6px; font-size: 13px; 
                                 <option>6</option><option>8</option><option selected>10</option><option>12</option><option>14</option><option>16</option>
                             </select>
                         </label>
-                        <label class="campo" data-so="ia">Código de acesso
+                        <label class="campo" id="campo-codigo" hidden>Código de acesso
                             <input name="codigo" type="password" autocomplete="off" placeholder="Fornecido pela escola">
                         </label>
 
@@ -1393,10 +1393,12 @@ addEventListener('resize', () => {
    FORMULÁRIO INICIAL
    ------------------------------------------------------------------ */
 let modo = 'ia';
+let precisaCodigo = false;   // o campo de senha só aparece se o servidor pedir
 $$('.aba').forEach(a => a.addEventListener('click', () => {
     modo = a.dataset.modo;
     $$('.aba').forEach(b => b.setAttribute('aria-selected', String(b === a)));
     $$('[data-so]').forEach(n => { n.hidden = n.dataset.so !== modo; });
+    $('#campo-codigo').hidden = modo !== 'ia' || !precisaCodigo;
     $('#btn-gerar').textContent = modo === 'ia' ? 'Gerar slides ▸' : 'Montar slides ▸';
     $('#erro').textContent = '';
 }));
@@ -1462,6 +1464,11 @@ $('#form').addEventListener('submit', async ev => {
             }),
         });
         const dados = await r.json().catch(() => ({}));
+        if (dados.precisaCodigo) {
+            precisaCodigo = true;
+            $('#campo-codigo').hidden = false;
+            f.codigo.focus();
+        }
         if (!r.ok || !dados.apresentacao) throw new Error(dados.erro || `Erro ${r.status} ao gerar os slides.`);
         abrirEstudio({ ...base, ...dados.apresentacao, titulo: dados.apresentacao.titulo || base.tema });
     } catch (e) {

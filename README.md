@@ -48,10 +48,11 @@ Requisitos: hospedagem com PHP 8.1+ e a extensão cURL.
    | Chave | O que é |
    |---|---|
    | `anthropic_api_key` | chave da API do Claude (console.anthropic.com), ou a variável `ANTHROPIC_API_KEY` |
-   | `slides_codigo` | código que o professor digita no app. **Vazio = geração com IA desligada** |
+   | `slides_codigo` | senha opcional. **Vazio = qualquer visitante gera sem senha**; preenchido, o app pede o código |
    | `slides_limite_hora` | gerações por IP por hora (padrão 20) |
+   | `slides_limite_dia` | teto de gerações do site inteiro por dia (padrão 200) |
 
-4. Abra o site, preencha o formulário e use o código de acesso para gerar.
+4. Abra o site, preencha o formulário e clique em "Gerar slides".
 
 Sem a chave configurada, o app continua funcionando no modo manual e com a
 aula de exemplo.
@@ -67,8 +68,9 @@ php -S localhost:8000
 
 - **A chave da API nunca vai para o navegador.** A chamada ao Claude é feita
   em PHP, no servidor.
-- **Cada geração custa créditos**, então o endpoint recusa pedidos sem o
-  código de acesso e limita o volume por IP.
+- **Cada geração custa créditos**, então o endpoint limita o volume por IP e
+  tem um teto diário para o site inteiro. Para restringir a quem tem senha,
+  preencha `slides_codigo`.
 - **O formato é garantido.** A chamada usa `claude-opus-5` com saída
   estruturada (JSON Schema); o PHP ainda normaliza o resultado, e o front só
   insere texto com `textContent`, nunca como HTML.

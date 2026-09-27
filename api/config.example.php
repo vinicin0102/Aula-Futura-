@@ -12,14 +12,17 @@ return [
     'anthropic_api_key' => getenv('ANTHROPIC_API_KEY') ?: '',
 
     /**
-     * Código que o professor digita no app para gerar slides com IA.
-     * Cada geração consome créditos da API, então a geração fica
-     * DESLIGADA enquanto este campo estiver vazio.
+     * Senha opcional para gerar com IA. Vazio = qualquer visitante gera sem
+     * senha. Preenchido = o app pede o código antes de gerar.
      */
     'slides_codigo' => getenv('SLIDES_CODIGO') ?: '',
 
-    // Gerações permitidas por IP a cada hora.
+    // Gerações permitidas por IP a cada hora (0 = sem limite).
     'slides_limite_hora' => 20,
+
+    // Teto de gerações do site inteiro por dia (0 = sem limite).
+    // Protege os créditos da API se o link se espalhar.
+    'slides_limite_dia' => 200,
 
     // Origens autorizadas a chamar a API de outro domínio (CORS).
     // Se o app e a pasta api/ estão no mesmo site, pode deixar vazio.
