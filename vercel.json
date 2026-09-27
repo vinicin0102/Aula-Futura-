@@ -1,9 +1,15 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "functions": {
-    "api/slides.js": { "maxDuration": 300 }
+    "api/slides.js": {
+      "maxDuration": 300,
+      "includeFiles": "api/icones.json"
+    }
   },
   "rewrites": [
-    { "source": "/api/slides.php", "destination": "/api/slides" }
+    {
+      "source": "/api/slides.php",
+      "destination": "/api/slides"
+    }
   ]
 }

@@ -24,7 +24,16 @@ storage/                 controle de limite por IP (não versionado)
   camadas, cartões flutuando, números que contam até o valor, pulso de energia
   nas etapas e títulos com brilho/glitch. Opcional: revelar os itens um a um,
   a cada clique. Respeita a opção "reduzir movimento" do sistema.
-- **Visuais:** Neon, Plasma, Solar, Matrix e Gelo.
+- **Identidade da matéria:** cada aula ganha um fundo animado ligado ao
+  conteúdo (traçado de ECG, hélice de DNA, células, moléculas, órbitas, ondas,
+  gráficos, curvas de nível, letras, linha do tempo, circuito ou rede), as
+  palavras-chave da aula flutuando e ícones em cada slide e tópico. A IA escolhe
+  tudo pelo conteúdo; no modo manual o app sugere pelo nome da disciplina. Tudo
+  pode ser trocado no estúdio.
+- **Cores:** automático (combina com a matéria), Neon, Plasma, Solar, Matrix,
+  Gelo, Vital, Natureza, Terra e Oceano.
+- **Ícones:** [Lucide](https://lucide.dev) (licença ISC), embutidos no app; a
+  lista usada pela IA fica em `api/icones.json`.
 - **Apresentação:** setas/espaço/clique/swipe para navegar, `N` mostra as notas,
   `F` tela cheia, `Esc` sai.
 - **Exportar:** "Baixar apresentação (.html)" gera um arquivo único que abre
